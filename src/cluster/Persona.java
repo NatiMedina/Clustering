@@ -23,6 +23,10 @@ public class Persona {
 	public String getDni() {
 		return dni;
 	}
+	
+	public boolean esMismoDni(String dni) {
+		return this.dni.equals(dni);
+	}
 
 	public void setDni(String dni) {
 		this.dni = dni;

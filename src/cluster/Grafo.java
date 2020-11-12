@@ -178,7 +178,7 @@ public class Grafo {
 		//Paso 4
 		componentes.add(arbolGeneradorMinimo.alcanzables(a));
 		componentes.add(arbolGeneradorMinimo.alcanzables(b));
-		System.out.println(componentes);
+		
 		return componentes;
 	}
 	
@@ -190,5 +190,9 @@ public class Grafo {
 		}
 	
 		return clique;
+	}
+
+	public void eliminarPersona(Persona p) {
+		personas.remove(p);
 	}
 }

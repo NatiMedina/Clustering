@@ -14,8 +14,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextPane;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class ClusterInterfaz {
 
@@ -28,6 +31,8 @@ public class ClusterInterfaz {
 	private JPanel panelPrincipal;
 	private JPanel panelPersona;
 	private JTextPane textPaneGrupos;
+
+	private JButton btnEliminar;
 
 	private static ClusterLogica clusterLogica = new ClusterLogica();
 
@@ -73,6 +78,12 @@ public class ClusterInterfaz {
 		panel.add(scrollPane);
 
 		table = new JTable();
+		table.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				btnEliminar.setEnabled(true);
+			}
+		});
 		scrollPane.setViewportView(table);
 
 		DefaultTableModel model = new DefaultTableModel();
@@ -95,16 +106,22 @@ public class ClusterInterfaz {
 		btnAgregar.setBounds(521, 16, 117, 55);
 		panel.add(btnAgregar);
 
-		JButton btnNewButton = new JButton("Calcular");
+		JButton btnNewButton = new JButton("Eliminar");
+		btnEliminar = btnNewButton;
+		btnNewButton.setEnabled(false);
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-			String grupos = clusterLogica.obtenerGrupos();
-			textPaneGrupos.setText(grupos);
+				Integer row = table.getSelectedRow();
+				String dni = (String)table.getValueAt(row, 0);
+				clusterLogica.eliminarPersona(dni);
+				model.removeRow(row);
+				
+				textPaneGrupos.setText(clusterLogica.obtenerGrupos());
+				btnNewButton.setEnabled(false);
 			}
 		});
 		btnNewButton.setBounds(521, 101, 117, 55);
 		panel.add(btnNewButton);
-		
 		
 
 		JTextPane textPane = new JTextPane();
@@ -200,32 +217,44 @@ public class ClusterInterfaz {
 			public void actionPerformed(ActionEvent arg0) {
 				String nombre = textFieldNombre.getText();
 				String dni = textFieldDni.getText();
-				Integer deporte = (Integer) comboBoxDeportes.getSelectedItem();
-				Integer musica = (Integer) comboBoxMusica.getSelectedItem();
-				Integer espectaculos = (Integer) comboBoxEspectaculos.getSelectedItem();
-				Integer ciencia = (Integer) comboBoxCiencia.getSelectedItem();
 
-				try {
-					clusterLogica.agregarPersona(dni, nombre, deporte, musica, espectaculos, ciencia);
-					textPaneGrupos.setText(clusterLogica.obtenerGrupos());
+
+				boolean dniIngresado = clusterLogica.dniYaFueIngresado(dni);
+				//VALIDAR DNI NO ESTE VACIO, NOMBRE no este VACIO y DNI no este repetido
+				if( !dniIngresado && !dni.isEmpty() && !nombre.isEmpty()) {
+					Integer deporte = (Integer) comboBoxDeportes.getSelectedItem();
+					Integer musica = (Integer) comboBoxMusica.getSelectedItem();
+					Integer espectaculos = (Integer) comboBoxEspectaculos.getSelectedItem();
+					Integer ciencia = (Integer) comboBoxCiencia.getSelectedItem();
 					
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					try {
+						
+						
+						clusterLogica.agregarPersona(dni, nombre, deporte, musica, espectaculos, ciencia);
+						textPaneGrupos.setText(clusterLogica.obtenerGrupos());
+						
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	
+					model.addRow(new Object[] { dni, nombre, deporte, musica, espectaculos, ciencia });
+	
+					panelPersona.setVisible(false);
+					panelPrincipal.setVisible(true);
+					comboBoxDeportes.setSelectedIndex(0);
+					comboBoxMusica.setSelectedIndex(0);
+					comboBoxEspectaculos.setSelectedIndex(0);
+					comboBoxCiencia.setSelectedIndex(0);
+					textFieldNombre.setText("");
+					textFieldDni.setText("");
+				}else {
+					
+					JOptionPane.showMessageDialog(frame,"Ingrese nombre y DNI (no repetido)");
 				}
-
-				model.addRow(new Object[] { dni, nombre, deporte, musica, espectaculos, ciencia });
-
-				panelPersona.setVisible(false);
-				panelPrincipal.setVisible(true);
-				comboBoxDeportes.setSelectedIndex(0);
-				comboBoxMusica.setSelectedIndex(0);
-				comboBoxEspectaculos.setSelectedIndex(0);
-				comboBoxCiencia.setSelectedIndex(0);
-				textFieldNombre.setText("");
-				textFieldDni.setText("");
 			}
 		});
-
+		
+		
 	}
 }
